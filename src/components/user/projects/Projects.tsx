@@ -9,8 +9,8 @@ import {
 	Tooltip,
 } from '@mantine/core'
 import { modals } from '@mantine/modals'
-import { IconEdit, IconTrash } from '@tabler/icons-react'
-import { useState, useEffect, memo } from 'react'
+import { IconRefresh, IconTrash } from '@tabler/icons-react'
+import { memo, useEffect, useState } from 'react'
 
 interface ProjectData {
 	id: string
@@ -21,7 +21,7 @@ interface ProjectData {
 }
 const getProjects = (): Promise<ProjectData[]> => {
 	return new Promise((resolve) => {
-		const projects = new Array(400).fill(0).map((_, index) => ({
+		const projects = new Array(4).fill(0).map((_, index) => ({
 			id: index.toString(),
 			name: `Project Name ${index}`,
 			repositoryUrl: `https://github.com/ghana7989/intelops-genpod`,
@@ -106,9 +106,9 @@ const TableRow = memo(
 				<Table.Td>{project.version}</Table.Td>
 				<Table.Td>
 					<SimpleGrid cols={2}>
-						<Tooltip label='Edit'>
+						<Tooltip label='Load'>
 							<ActionIcon p={2}>
-								<IconEdit />
+								<IconRefresh />
 							</ActionIcon>
 						</Tooltip>
 						<Tooltip label='Delete Project'>

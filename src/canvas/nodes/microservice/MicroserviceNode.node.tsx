@@ -1,13 +1,15 @@
-import { Box, Drawer, Flex, Grid, Text } from '@mantine/core'
-import { useDisclosure } from '@mantine/hooks'
-import { IconArrowForwardUp, IconEdit } from '@tabler/icons-react'
 import classNames from 'classnames'
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Handle, NodeProps, Position } from 'reactflow'
+
+import { Box, Drawer, Flex, Grid, Text } from '@mantine/core'
+import { useDisclosure } from '@mantine/hooks'
+import { IconArrowForwardUp, IconEdit } from '@tabler/icons-react'
+
 import { useFlowStore } from '../../store/flowstore'
 import { CustomNodeFormData, NodeTypes } from '../../store/types.store'
-import MicroServiceNodeDrawerForm from './form/MicroserviceNode.modal.form'
+import MicroServiceNodeDrawerForm from './form/MicroserviceNode.drawer.form'
 import classes from './styles.module.css'
 
 export default function MicroserviceNode(props: NodeProps<CustomNodeFormData>) {
@@ -68,7 +70,8 @@ export default function MicroserviceNode(props: NodeProps<CustomNodeFormData>) {
 					</Box>
 				</Flex>
 				<Drawer
-					closeOnEscape
+					closeOnClickOutside={false}
+					closeOnEscape={false}
 					opened={opened}
 					onClose={close}
 					title='Fill Node Form Details'
@@ -78,8 +81,8 @@ export default function MicroserviceNode(props: NodeProps<CustomNodeFormData>) {
 				>
 					<MicroServiceNodeDrawerForm
 						nodeId={id}
-						onSubmit={() => {
-							close()
+						onSubmit={(data) => {
+							console.log('data: ', data)
 						}}
 					/>
 				</Drawer>
