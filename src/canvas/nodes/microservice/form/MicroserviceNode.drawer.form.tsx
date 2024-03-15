@@ -25,47 +25,55 @@ export default function MicroServiceNodeDrawerForm(
   const form = useForm<MicroServiceNodeFormDataUI>({
     defaultValues: structuredClone(currentFormData),
     resolver: zodResolver(schema),
-    reValidateMode: 'onBlur',
+    reValidateMode: 'onChange',
     criteriaMode: 'all'
   });
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const updatedName = e.target.value.replace(/\s+/g, '_');
+    form.setValue('name', updatedName, { shouldValidate: true });
+  };
+
   const transformToNodeFormData = useCallback(
     (data: MicroServiceNodeFormDataUI): MicroServiceNodeFormData => {
-      const t: MicroServiceNodeFormData = {
+      const formData: MicroServiceNodeFormData = {
         name: data.name,
         description: data.description,
         language: data.language,
         restConfig: data.restConfig,
         grpcConfig: data.grpcConfig,
         annotations: {},
-        id: 'form' + props.nodeId,
+        id: `form${props.nodeId}`,
         metadata: {},
         type: NodeTypes.MICROSERVICE,
         wsConfig: undefined
       };
-      return t;
+      return formData;
     },
     [props.nodeId]
   );
+  const handleSubmitCapture = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+  };
+
+  const handleSubmit = form.handleSubmit(() => {
+    const transformedData = transformToNodeFormData(form.getValues());
+    setNodeFormData(transformedData, props.nodeId);
+    props.onSubmit(transformedData);
+  });
+
+  const handleLanguageChange = () => {
+    handleResets(form);
+  };
   return (
     <>
-      <form
-        onSubmitCapture={e => {
-          e.preventDefault();
-        }}
-        onSubmit={form.handleSubmit(data => {
-          setNodeFormData(
-            transformToNodeFormData(form.getValues()),
-            props.nodeId
-          );
-          props.onSubmit(transformToNodeFormData(data));
-        })}
-      >
+      <form onSubmitCapture={handleSubmitCapture} onSubmit={handleSubmit}>
         <TextInput
           control={form.control}
           withAsterisk
           label="Name"
           placeholder="Name"
           name="name"
+          onChange={handleNameChange}
         />
         <Textarea
           name="description"
@@ -80,9 +88,7 @@ export default function MicroServiceNodeDrawerForm(
           label="Language"
           placeholder="Language"
           data={getLanguageOptions()}
-          onChange={() => {
-            handleResets(form);
-          }}
+          onChange={handleLanguageChange}
         />
         {!!form.watch('language') && (
           <>
