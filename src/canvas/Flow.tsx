@@ -1,19 +1,24 @@
 import { Box, Button, Drawer } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { IconCircleArrowUp, IconEyeCode } from '@tabler/icons-react';
+import { useCallback } from 'react';
 import ReactFlow, {
   Background,
   BackgroundVariant,
   Controls,
   Panel
 } from 'reactflow';
+import { useProjectOperations } from 'src/api/useProjectOperations/useProjectOperations';
 import AddNodeModal from 'src/components/common/modal/AddNodeModal';
+import { useProjectStore } from 'src/store/useProjectStore';
 import CodeViewDrawer from './drawers/code-view/CodeViewDrawer';
 import ClientNode from './nodes/client-node/ClientNode.node';
 import DBNode from './nodes/db-node/DBNode.node';
 import MicroserviceNode from './nodes/microservice/MicroserviceNode.node';
 import { useFlowsStore } from './store/flowstore';
 import { NodeTypes } from './store/types.store';
-import { IconEyeCode } from '@tabler/icons-react';
+import { convertFlowDataToProject } from './utils';
+import { InAppNotifications } from 'src/notifications';
 
 const nodeTypes = {
   [NodeTypes.MICROSERVICE]: MicroserviceNode,
@@ -23,15 +28,64 @@ const nodeTypes = {
 
 // interface FlowProps extends Partial<ReactFlowProps> {}
 export default function Flow() {
-  const { onNodesChange, onEdgesChange, onConnect, getNodesAndEdges } =
-    useFlowsStore();
+  const {
+    onNodesChange,
+    onEdgesChange,
+    onConnect,
+    getNodesAndEdges,
+    flows,
+    activeFlow
+  } = useFlowsStore();
+  const projectId = activeFlow?.slice(4);
   const { nodes, edges } = getNodesAndEdges();
   const [
     isCodeViewDrawerOpen,
     { close: closeCodeViewDrawer, open: openCodeViewDrawer }
   ] = useDisclosure(false);
+
+  const projects = useProjectStore(state => state.projects);
+  const { updateProject } = useProjectOperations();
+
   const handleViewCodeClick = () => {
     openCodeViewDrawer();
+  };
+
+  const getFlow = useCallback(() => {
+    if (!flows || !activeFlow) return;
+    return flows[activeFlow];
+  }, [flows, activeFlow]);
+
+  const handleSyncClick = async () => {
+    const currentFlow = getFlow();
+    if (!currentFlow) {
+      console.error('No flow found');
+      return;
+    }
+
+    const projectDetails = projects.find(project => project.id === projectId);
+
+    if (!projectDetails || !activeFlow || !projectId) {
+      console.error({
+        projectDetails,
+        activeFlow,
+        projectId
+      });
+      return;
+    }
+    const formattedProject = convertFlowDataToProject({
+      ...projectDetails,
+      nodes: currentFlow.nodes,
+      edges: currentFlow.edges,
+      project: {
+        ...projectDetails
+      }
+    });
+    const { data, error } = await updateProject(projectId, formattedProject);
+    if (error || !data) {
+      InAppNotifications.project.failedToSync(projectId);
+    } else {
+      InAppNotifications.project.syncedSuccessfully(projectId);
+    }
   };
   return (
     <>
@@ -69,7 +123,15 @@ export default function Flow() {
               leftSection={<IconEyeCode />}
               onClick={handleViewCodeClick}
             >
-              View Code
+              View Generated Config
+            </Button>
+            <Button
+              bg="blue.4"
+              ml="sm"
+              leftSection={<IconCircleArrowUp />}
+              onClick={handleSyncClick}
+            >
+              Sync Code
             </Button>
           </Panel>
           <Controls />

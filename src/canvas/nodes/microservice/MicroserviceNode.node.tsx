@@ -33,6 +33,7 @@ export default function MicroserviceNode(props: NodeProps<CustomNodeFormData>) {
             [classes['node_selected']]: selected
           })}
           gap={0}
+          h="min-content"
         >
           <Grid className={classes.node__header}>
             <Grid.Col span={8}>
@@ -52,7 +53,7 @@ export default function MicroserviceNode(props: NodeProps<CustomNodeFormData>) {
               <Link to={`/node/${id}`}>
                 <IconArrowForwardUp
                   onClick={() => {
-                    // addInitialNode(id)
+                    // TODO: Implement Nested nodes
                   }}
                 />
               </Link>

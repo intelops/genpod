@@ -13,6 +13,10 @@ import { IconEdit, IconTrashFilled } from '@tabler/icons-react';
 import { useState } from 'react';
 import { UseFormReturn, useFieldArray } from 'react-hook-form';
 import { FileInput, NumberInput, Select } from 'react-hook-form-mantine';
+import { useProjectOperations } from 'src/api/useProjectOperations/useProjectOperations';
+import { useFlowsStore } from 'src/canvas/store/flowstore';
+import { InAppNotifications } from 'src/notifications';
+import { useProjectStore } from 'src/store/useProjectStore';
 import {
   getDBOptions,
   getFrameworkOptions,
@@ -45,6 +49,8 @@ export default function RestConfigForm({ form }: RestConfigFormProps) {
     number | undefined
   >(undefined);
 
+  const { postYamlContent } = useProjectOperations();
+
   const {
     append: appendResource,
     update: updateResource,
@@ -53,6 +59,48 @@ export default function RestConfigForm({ form }: RestConfigFormProps) {
     control: form.control,
     name: 'restConfig.server.resources'
   });
+  const { activeProject } = useProjectStore();
+  const { flows, activeFlow } = useFlowsStore();
+
+  const handleFileUpload = async () => {
+    if (form.watch('restConfig.server.openApiFileYamlContent')) {
+      const file = form.getValues('restConfig.server.openApiFileYamlContent');
+      if (
+        file &&
+        activeProject &&
+        flows &&
+        activeFlow &&
+        flows[activeFlow]?.activeNode
+      ) {
+        const { data, error } = await postYamlContent(
+          flows[activeFlow].activeNode!.id,
+          activeProject.id,
+          file
+        );
+        if (error || !data) {
+          InAppNotifications.project.uploadYamlFailed(
+            activeProject.id,
+            flows[activeFlow].activeNode!.id
+          );
+        } else {
+          InAppNotifications.project.uploadedYamlSuccessfully(
+            activeProject.id,
+            flows[activeFlow].activeNode!.id
+          );
+        }
+      }
+      const reader = new FileReader();
+      reader.readAsText(file as File);
+      reader.addEventListener('load', () => {
+        console.log('reader.result: ', reader.result);
+        form.setValue(
+          'restConfig.server.openApiFileYamlContent',
+          reader.result?.toString()
+        );
+        form.setValue('restConfig.server.port', '8080');
+      });
+    }
+  };
 
   const handleAddResourceClick = () => {
     openAddResourceModal();
@@ -132,12 +180,18 @@ export default function RestConfigForm({ form }: RestConfigFormProps) {
           <Grid.Col span={12}>
             {form.watch('restConfig.template') ===
               SupportedTemplates.OPEN_API && (
-              <FileInput
-                accept=".yaml,.yml,.json"
-                control={form.control}
-                name="restConfig.server.openApiFileYamlContent"
-                label="Upload YAML file"
-              />
+              <Flex align="end" gap="md">
+                <FileInput
+                  flex={1}
+                  accept=".yaml,.yml,.json"
+                  control={form.control}
+                  name="restConfig.server.openApiFileYamlContent"
+                  label="Upload YAML file"
+                />
+                <Button onClick={handleFileUpload} variant="outline">
+                  Upload File
+                </Button>
+              </Flex>
             )}
           </Grid.Col>
           {form.watch('restConfig.template') === SupportedTemplates.COMPAGE && (

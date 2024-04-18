@@ -1,28 +1,24 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { ProjectStore } from './types';
+import { immer } from 'zustand/middleware/immer';
+import { ProjectStoreActions, ProjectStoreState } from './types';
 
-export const useProjectStore = create<ProjectStore>()(
+export const useProjectStore = create<
+  ProjectStoreState & ProjectStoreActions
+>()(
   devtools(
     persist(
-      set => {
+      immer((set, get) => {
         return {
-          _hasHydrated: false,
-          _setHasHydrated: hasHydrated => {
-            set({ _hasHydrated: hasHydrated });
-          },
           activeProject: null,
           projects: [],
           setActiveProject: projectId => {
-            set(state => {
-              const activeProject = state.projects.find(
-                p => p.id === projectId
-              );
-              return { activeProject };
-            });
+            if (!projectId) return set({ activeProject: null });
+            const activeProject = get().projects.find(p => p.id === projectId);
+            return set({ activeProject });
           },
-          setProjects: (projects, replace = true) => {
-            set({ projects }, replace);
+          setProjects: projects => {
+            set({ projects });
           },
           removeProject: project => {
             set(state => {
@@ -33,11 +29,14 @@ export const useProjectStore = create<ProjectStore>()(
             });
           }
         };
-      },
+      }),
       {
-        name: 'user-project-store',
-        onRehydrateStorage: () => state => {
-          if (state) state._setHasHydrated(true);
+        name: 'project-store',
+        partialize: (state: ProjectStoreState) => {
+          return {
+            activeProject: state.activeProject,
+            projects: state.projects
+          };
         }
       }
     ),
