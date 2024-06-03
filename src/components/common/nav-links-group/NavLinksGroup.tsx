@@ -12,12 +12,14 @@ import {
 import { IconChevronRight, TablerIconsProps } from '@tabler/icons-react';
 
 import classes from './NavLinksGroup.module.css';
+import { useNavigate } from 'react-router-dom';
 
 interface NavBarLinksGroupProps {
   icon: React.FC<TablerIconsProps>;
   label: string;
   initiallyOpened?: boolean;
   links?: { label: string; link: string }[];
+  isComingSoon?: boolean;
 }
 
 export function NavBarLinksGroup({
@@ -28,11 +30,16 @@ export function NavBarLinksGroup({
 }: NavBarLinksGroupProps) {
   const hasLinks = Array.isArray(links);
   const [opened, setOpened] = useState<boolean>(!!initiallyOpened);
-
+  const navigate = useNavigate();
   const toggleOpen = () => setOpened(o => !o);
 
-  const preventDefault = (event: React.MouseEvent<HTMLAnchorElement>) =>
+  const preventDefault = (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    link: string
+  ) => {
     event.preventDefault();
+    return navigate(link);
+  };
 
   const renderLink = (link: { label: string; link: string }) => (
     <Text<'a'>
@@ -40,7 +47,7 @@ export function NavBarLinksGroup({
       className={classes.link}
       href={link.link}
       key={link.label}
-      onClick={preventDefault}
+      onClick={e => preventDefault(e, link.link)}
     >
       {link.label}
     </Text>

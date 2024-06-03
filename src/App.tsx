@@ -1,30 +1,38 @@
 import '@mantine/code-highlight/styles.css';
 import '@mantine/core/styles.css';
-import { Notifications } from '@mantine/notifications';
 import '@mantine/notifications/styles.css';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import 'reactflow/dist/style.css';
 import './App.css';
 
-import { ModalsProvider } from '@mantine/modals';
 import { useEffect } from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { ReactFlowProvider } from 'reactflow';
+
+import { ModalsProvider } from '@mantine/modals';
+import { Notifications } from '@mantine/notifications';
+
 import { useSyncActions } from './hooks/useSyncActions';
 import { InAppNotifications } from './notifications';
 import PageNotFound from './pages/404';
+import ComingSoon from './pages/coming-soon/ComingSoon';
+import Genval from './pages/genval/Genval';
 import Home from './pages/home/Home';
 import Login from './pages/login/Login';
 import Profile from './pages/profile/Profile';
 import Project from './pages/project/Project';
+import Layout from './pages/testing/Layout';
+import { useFeatureFlagStore } from './store/useFeatureFlagStore';
 import { runEnvVariablesCheck } from './utils/checkEnvVariables';
 import { pingCheckServer } from './utils/pingCheckServer';
 
 function App() {
   const { syncProjects, syncGitPlatforms } = useSyncActions();
+  const { fetchAllFeatureFlags, areFeatureFlagsLoaded } = useFeatureFlagStore();
   useEffect(() => {
     runEnvVariablesCheck();
     syncProjects();
     syncGitPlatforms();
+    fetchAllFeatureFlags();
     (async function () {
       const res = await pingCheckServer();
       if (!res) {
@@ -33,6 +41,7 @@ function App() {
     })();
   }, []);
 
+  if (!areFeatureFlagsLoaded) return null;
   return (
     <BrowserRouter>
       <Notifications />
@@ -40,6 +49,9 @@ function App() {
         <ModalsProvider>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/genval" element={<Genval />} />
+            <Route path="/coming-soon" element={<ComingSoon />} />
+            <Route path="/test" element={<Layout />} />
             <Route path="/login" element={<Login />} />
             <Route path="/project/:projectId" element={<Project />} />
             <Route path="/profile" index element={<Profile />} />
