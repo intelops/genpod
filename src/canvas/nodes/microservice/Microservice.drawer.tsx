@@ -1,36 +1,26 @@
 import { Drawer, rem, Tabs } from '@mantine/core';
-import { IconCloudDataConnection, IconCode } from '@tabler/icons-react';
-import CodeEditor from 'src/components/common/code-editor';
-import MicroServiceNodeDrawerForm from './form/MicroserviceNode.drawer.form';
-import styles from './styles.module.css';
+import { IconCode, IconSatellite } from '@tabler/icons-react';
 import { useState } from 'react';
-import axiosFileServer from 'src/api/axiosFileServer';
+import MicroServiceNodeDrawerForm from './form/MicroserviceNode.drawer.form';
+import MicroserviceNodeStatus from './status/MicroserviceNode.status';
 
 interface MicroserviceDrawerProps {
   opened: boolean;
   close: () => void;
   nodeId: string;
 }
+type Tab = 'requirements' | 'status';
 export default function MicroserviceDrawer({
   opened,
   nodeId,
   close
 }: MicroserviceDrawerProps) {
-  const iconStyle = { width: rem(12), height: rem(12) };
+  const iconStyle = { width: rem(20), height: rem(20) };
+  const [activeTab, setActiveTab] = useState<Tab>('requirements');
 
-  const [value, setValue] = useState('');
-  const onCodeChange = (content: string) => {
-    setValue(content);
-    axiosFileServer.post(
-      '/create-file',
-      JSON.stringify({
-        fileName: 'microservice/bla',
-        fileType: 'yaml',
-        content
-      })
-    );
+  const handleTabChange = (tab: Tab) => {
+    setActiveTab(tab);
   };
-
   return (
     <Drawer
       closeOnClickOutside={false}
@@ -42,30 +32,39 @@ export default function MicroserviceDrawer({
       size="xl"
       overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
     >
-      <Tabs defaultValue="flow">
+      <Tabs
+        value={activeTab}
+        onChange={v => handleTabChange(v as Tab)}
+        keepMounted={false}
+      >
         <Tabs.List>
           <Tabs.Tab
-            value="flow"
-            leftSection={<IconCloudDataConnection style={iconStyle} />}
-          >
-            Form
-          </Tabs.Tab>
-          <Tabs.Tab
-            value="code-editor"
+            value="requirements"
             leftSection={<IconCode style={iconStyle} />}
           >
-            Code Editor
+            Requirements
+          </Tabs.Tab>
+          <Tabs.Tab
+            value="status"
+            leftSection={<IconSatellite style={iconStyle} />}
+          >
+            Status
           </Tabs.Tab>
         </Tabs.List>
 
-        <Tabs.Panel value="flow">
-          <MicroServiceNodeDrawerForm nodeId={nodeId} onSubmit={() => {}} />
+        <Tabs.Panel value="requirements">
+          <MicroServiceNodeDrawerForm
+            nodeId={nodeId}
+            onSubmit={() => {
+              close();
+            }}
+            onGenerateButtonClick={() => {
+              handleTabChange('status');
+            }}
+          />
         </Tabs.Panel>
-
-        <Tabs.Panel value="code-editor">
-          <div className={styles.codeEditor}>
-            <CodeEditor onChange={onCodeChange} value={value} />
-          </div>
+        <Tabs.Panel value="status">
+          <MicroserviceNodeStatus nodeId={nodeId} />
         </Tabs.Panel>
       </Tabs>
     </Drawer>

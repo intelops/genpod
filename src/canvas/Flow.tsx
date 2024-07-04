@@ -1,7 +1,5 @@
-import { Box, Button, Drawer } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { IconCircleArrowUp, IconEyeCode } from '@tabler/icons-react';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ReactFlow, {
   Background,
   BackgroundVariant,
@@ -11,23 +9,26 @@ import ReactFlow, {
 import { useProjectOperations } from 'src/api/useProjectOperations/useProjectOperations';
 import AddNodeModal from 'src/components/common/modal/AddNodeModal';
 import { InAppNotifications } from 'src/notifications';
+import { Project } from 'src/store/types';
 import { useProjectStore } from 'src/store/useProjectStore';
+
+import { Box, Button, Drawer } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import {
+  IconCircleArrowUp,
+  IconEyeCode,
+  IconRobotFace
+} from '@tabler/icons-react';
+
 import CodeViewDrawer from './drawers/code-view/CodeViewDrawer';
-import ClientNode from './nodes/client-node/ClientNode.node';
-import DBNode from './nodes/db-node/DBNode.node';
-import MicroserviceNode from './nodes/microservice/MicroserviceNode.node';
+import { edgeTypes } from './edges';
+import { nodeTypes } from './nodes';
 import { useFlowsStore } from './store/flowstore';
 import { NodeTypes } from './store/types.store';
-import { convertFlowDataToProject } from './utils';
-import AddCustomLicenseModal from './modals/AddCustomLicenseModal';
-
-const nodeTypes = {
-  [NodeTypes.MICROSERVICE]: MicroserviceNode,
-  [NodeTypes.DB_NODE]: DBNode,
-  [NodeTypes.CLIENT_NODE]: ClientNode
-};
 
 export default function Flow() {
+  const [data, setData] = useState('');
+
   const {
     onNodesChange,
     onEdgesChange,
@@ -36,13 +37,17 @@ export default function Flow() {
     flows,
     activeFlow
   } = useFlowsStore();
+  const navigate = useNavigate();
   const projectId = activeFlow?.slice(4);
   const { nodes, edges } = getNodesAndEdges();
   const [
     isCodeViewDrawerOpen,
     { close: closeCodeViewDrawer, open: openCodeViewDrawer }
   ] = useDisclosure(false);
-
+  const [
+    isGenerateCodeDrawerOpen,
+    { close: closeGenerateCodeDrawer, open: openGenerateCodeDrawer }
+  ] = useDisclosure(false);
   const projects = useProjectStore(state => state.projects);
   const { updateProject } = useProjectOperations();
 
@@ -55,15 +60,14 @@ export default function Flow() {
     return flows[activeFlow];
   }, [flows, activeFlow]);
 
-  const handleSyncClick = async () => {
+  const handleSaveConfigClick = async () => {
     const currentFlow = getFlow();
 
     if (!currentFlow) {
-      console.error('No flow found');
       return;
     }
 
-    const projectDetails = projects.find(project => project.id === projectId);
+    const projectDetails = projects.find(project => project.id == projectId);
 
     if (!projectDetails || !activeFlow || !projectId) {
       console.error({
@@ -73,24 +77,42 @@ export default function Flow() {
       });
       return;
     }
-    const formattedProject = convertFlowDataToProject({
-      ...projectDetails,
-      nodes: currentFlow.nodes,
-      edges: currentFlow.edges,
-      project: {
-        ...projectDetails,
-        metadata: {
-          ...projectDetails.metadata,
-          licenses: currentFlow.licenses
-        }
-      }
-    });
+    const formattedProject: Project = {
+      flow: {
+        nodes,
+        edges
+      },
+      id: projectId,
+      name: projectDetails.name
+    };
     const { data, error } = await updateProject(projectId, formattedProject);
     if (error || !data) {
       InAppNotifications.project.failedToSync(projectId);
     } else {
       InAppNotifications.project.syncedSuccessfully(projectId);
     }
+  };
+
+  const handleGenerateClick = async () => {
+    openGenerateCodeDrawer();
+    // Dummy code to test the stream
+    // should be removed eventually
+    try {
+      const response = await fetch('http://localhost:3003/stream');
+      const reader = response.body!.getReader();
+      const decoder = new TextDecoder();
+      let result = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        result += decoder.decode(value);
+        setData(prevData => prevData + decoder.decode(value));
+      }
+    } catch (error) {}
+  };
+  const handleViewStatusClick = () => {
+    navigate(`/project/${projectId}/status`);
   };
   return (
     <>
@@ -100,6 +122,7 @@ export default function Flow() {
             hideAttribution: true
           }}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
@@ -112,16 +135,7 @@ export default function Flow() {
               buttonText="Add Microservice Node"
               mx="sm"
             />
-            {/* <AddNodeModal
-              type={NodeTypes.DB_NODE}
-              buttonText="Add DB Node"
-              mx="sm"
-            /> */}
-            {/* <AddNodeModal
-              type={NodeTypes.CLIENT_NODE}
-              buttonText="Add Client Node"
-              mx="sm"
-            /> */}
+
             <Button
               bg="blue.4"
               ml="sm"
@@ -134,11 +148,20 @@ export default function Flow() {
               bg="blue.4"
               ml="sm"
               leftSection={<IconCircleArrowUp />}
-              onClick={handleSyncClick}
+              onClick={handleSaveConfigClick}
             >
-              Sync Code
+              Save Config
             </Button>
-            <AddCustomLicenseModal />
+            <Button
+              ml="sm"
+              leftSection={<IconRobotFace />}
+              onClick={handleGenerateClick}
+            >
+              Generate Code
+            </Button>
+            <Button ml="sm" onClick={handleViewStatusClick}>
+              View Project Status
+            </Button>
           </Panel>
           <Controls />
           <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
@@ -153,6 +176,21 @@ export default function Flow() {
         closeOnEscape={false}
       >
         <CodeViewDrawer />
+      </Drawer>
+      <Drawer
+        size="xl"
+        position="right"
+        onClose={() => {
+          closeGenerateCodeDrawer();
+          setData('');
+        }}
+        opened={isGenerateCodeDrawerOpen}
+        closeOnEscape
+        closeOnClickOutside
+      >
+        <Box p="lg" w="100%" h="100%">
+          <pre>{data}</pre>
+        </Box>
       </Drawer>
     </>
   );
