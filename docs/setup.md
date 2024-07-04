@@ -7,14 +7,14 @@ This documentation provides detailed instructions on how to set up the **Genpod*
 
 The project consists of three main parts:
 
-*   React application using Vite
-*   File server
-*   Socket server
+* React application using Vite
+* File server
+* Socket server
 
 ## Prerequisites
 
-*   Node.js (>= 14.x)
-*   Yarn package manager
+* Node.js (>= 14.x)
+* Yarn package manager
 
 ## Step-by-Step Setup
 
@@ -194,28 +194,34 @@ The `socket-server` should now be running at `http://localhost:3002`.
 
 ### React Application Scripts
 
-*   `yarn dev-cy` - Install Cypress and run the development server and coverage report.
-*   `yarn dev` - Run the development script located at `scripts/dev.sh`.
-*   `yarn build` - Compile TypeScript and build the Vite project.
-*   `yarn lint` - Lint the project files.
-*   `yarn clean-dev` - Clean node_modules, reinstall dependencies, and run the development server.
-*   `yarn preview` - Preview the built project.
-*   `yarn storybook` - Start Storybook for UI component development.
-*   `yarn build-storybook` - Build the Storybook static site.
-*   `yarn cy-install` - Install Cypress.
-*   `yarn cy:open-e2e` - Open Cypress for end-to-end testing.
-*   `yarn cy:open-unit` - Open Cypress for unit testing.
-*   `yarn cy:run-e2e` - Run Cypress end-to-end tests.
-*   `yarn cy:run-unit` - Run Cypress unit tests.
-*   `yarn coverage-open` - Run unit tests and serve the coverage report.
+* `yarn dev-cy` - Install Cypress and run the development server and coverage report.
+* `yarn dev` - Run the development script located at `scripts/dev.sh`.
+* `yarn build` - Compile TypeScript and build the Vite project.
+* `yarn lint` - Lint the project files.
+* `yarn clean-dev` - Clean node_modules, reinstall dependencies, and run the development server.
+* `yarn preview` - Preview the built project.
+* `yarn storybook` - Start Storybook for UI component development.
+* `yarn build-storybook` - Build the Storybook static site.
+* `yarn cy-install` - Install Cypress.
+* `yarn cy:open-e2e` - Open Cypress for end-to-end testing.
+* `yarn cy:open-unit` - Open Cypress for unit testing.
+* `yarn cy:run-e2e` - Run Cypress end-to-end tests.
+* `yarn cy:run-unit` - Run Cypress unit tests.
+* `yarn coverage-open` - Run unit tests and serve the coverage report.
 
 ### File Server Scripts
 
-*   `yarn dev` - Start the file server using `nodemon`.
+* `yarn dev` - Start the file server using `nodemon`.
 
 ### Socket Server Scripts
 
-*   `yarn dev` - Start the socket server using `ts-node`.
+* `yarn dev` - Start the socket server using `ts-node`.
+
+### Spin up dummy llm agent
+
+```bash
+cd dummy-llm-agent && yarn && yarn dev
+```
 
 ## Conclusion
 
