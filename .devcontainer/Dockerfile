@@ -25,7 +25,7 @@ RUN npm install -g node-pty
 RUN npm install -g nodemon
 
 # Install vite globally
-RUN npm install --save-dev vite 
+RUN npm install -g vite 
 
 # Set up workspace directory
 WORKDIR /workspace
