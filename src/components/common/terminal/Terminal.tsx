@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 import socket from 'src/utils/socket';
-import { Terminal } from 'xterm';
-import { FitAddon } from 'xterm-addon-fit';
-import 'xterm/css/xterm.css';
+import { Terminal } from '@xterm/xterm';
+import { FitAddon } from '@xterm/addon-fit';
+import '@xterm/xterm/css/xterm.css';
 
 const TerminalComponent = () => {
   const terminalRef = useRef<HTMLDivElement | null>(null);
