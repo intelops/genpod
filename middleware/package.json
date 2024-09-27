@@ -2,7 +2,13 @@
   "name": "middleware",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE FILE",
+  "licenses": [
+    {
+      "type": "CUSTOM",
+      "url": "https://github.com/intelops/genpod/blob/main/LICENSE"
+    }
+  ],
   "scripts": {
     "dev": "npx nodemon --config nodemon.json"
   },

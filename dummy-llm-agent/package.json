@@ -2,6 +2,13 @@
   "name": "dummy-llm-agent",
   "version": "1.0.0",
   "description": "",
+  "license": "SEE LICENSE IN LICENSE FILE",
+  "licenses": [
+    {
+      "type": "CUSTOM",
+      "url": "https://github.com/intelops/genpod/blob/main/LICENSE"
+    }
+  ],
   "main": "index.js",
   "scripts": {
     "dev": "npx nodemon index.js"

@@ -1,5 +1,13 @@
 {
   "name": "socket-server",
+  "license": "SEE LICENSE IN LICENSE FILE",
+  "licenses": [
+    {
+      "type": "CUSTOM",
+      "url": "https://github.com/intelops/genpod/blob/main/LICENSE"
+    }
+  ],
+
   "scripts": {
     "dev": "ts-node src/server.ts"
   },
