@@ -1,3 +1,5 @@
+#!/bin/bash
+
 chmod +x ./scripts/kill_ports.sh
 bash ./scripts/kill_ports.sh
 #  parallelly run the server and client
