@@ -4,7 +4,11 @@
 
   "customizations": {
     "settings": {
-      "terminal.integrated.shell.linux": "/bin/bash"      
+      "terminal.integrated.shell.linux": "/bin/bash",
+      "terminal.integrated.defaultProfile.linux": "bash",
+      "python.defaultInterpreterPath": "/usr/bin/python3",
+      "editor.formatOnSave": true,
+      "editor.codeActionsOnSave": {"source.fixAll.eslint": true}      
     },
     "vscode": {
       "extensions": [
@@ -47,7 +51,9 @@
         "vincaslt.highlight-matching-tag",
         "whtouche.vscode-js-console-utils",
         "wix.vscode-import-cost",
-        "xabikos.JavaScriptSnippets"
+        "xabikos.JavaScriptSnippets",
+        "ms-python.python",
+        "mtxr.sqltools"
       ]
     }
   },
@@ -61,5 +67,7 @@
   "mounts": [
     "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached"
   ],
+
   "postCreateCommand": "yarn install && yarn dev"
+
 }
