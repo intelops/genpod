@@ -1,13 +1,26 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
-import { BrowserRouter } from 'react-router-dom'
+import './index.css';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-	<React.StrictMode>
-		<BrowserRouter>
-			<App />
-		</BrowserRouter>
-	</React.StrictMode>
-)
+// skipcq: JS-W1028
+import { createRoot } from 'react-dom/client';
+
+import { MantineProvider } from '@mantine/core';
+
+import App from './App.tsx';
+import { initStores } from './store/initStores.ts';
+import theme, { cssVariableResolver } from './theme.ts';
+
+initStores();
+
+const rootElement = document.getElementById('root');
+if (rootElement)
+  createRoot(rootElement).render(
+    // <React.StrictMode>
+    <MantineProvider
+      theme={theme}
+      defaultColorScheme="dark"
+      cssVariablesResolver={cssVariableResolver}
+    >
+      <App />
+    </MantineProvider>
+    // </React.StrictMode>
+  );

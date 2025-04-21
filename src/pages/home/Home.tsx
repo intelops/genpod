@@ -1,24 +1,21 @@
-import { Grid } from '@mantine/core'
-import Flow from 'src/canvas/Flow'
-import SideNavbar from 'src/components/common/side-nav/SideNavbar'
-import Layout from '../../components/common/layout/Layout'
+import { Text } from '@mantine/core';
+import LayoutWithSideBar from 'src/components/common/layout/LayoutWithSideBar';
+import AddOrLoadProject from 'src/components/home/projects/AddOrLoadProject';
+import Protected from 'src/hoc/protected';
+import useUserStore from 'src/store/userStore';
 
-export default function Home() {
-	return (
-		<Layout>
-			<Grid
-				style={{
-					width: '100vw',
-				}}
-				gutter={0}
-			>
-				<Grid.Col span={2}>
-					<SideNavbar />
-				</Grid.Col>
-				<Grid.Col span={10}>
-					<Flow />
-				</Grid.Col>
-			</Grid>
-		</Layout>
-	)
-}
+const Home = () => {
+  const { personalDetails } = useUserStore();
+  return (
+    <Protected>
+      <LayoutWithSideBar>
+        <Text ta="center" size="xl">
+          Hello {personalDetails.username}!
+        </Text>
+        <AddOrLoadProject />
+      </LayoutWithSideBar>
+    </Protected>
+  );
+};
+
+export default Home;

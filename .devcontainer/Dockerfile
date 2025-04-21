@@ -1,6 +1,31 @@
-FROM mcr.microsoft.com/vscode/devcontainers/typescript-node:latest
+FROM node:current-alpine
 
-# Install additional OS packages if needed
-# RUN apt-get update && apt-get install -y <your-packages-here>
+# Install necessary packages
+RUN apk add --no-cache \
+    python3 \
+    py3-pip \
+    make \
+    g++ \
+    sqlite \
+    git \
+    bash \
+    lsof \
+    libc6-compat 
 
+# Install yarn globally
+# RUN npm install -g yarn
+
+# Install node-gyp globally
+RUN npm install -g node-gyp
+
+# Install node-pty globally
+RUN npm install -g node-pty
+
+# Install nodemon globally
+RUN npm install -g nodemon
+
+# Install vite globally
+RUN npm install -g vite 
+
+# Set up workspace directory
 WORKDIR /workspace
